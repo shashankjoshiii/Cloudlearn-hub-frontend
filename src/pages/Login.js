@@ -18,13 +18,25 @@ const Login = () => {
         e.preventDefault();
         const endpoint = isSignup ? '/api/signup' : '/api/login';
         try {
-            const res = await axios.post(`http://localhost:5000${endpoint}`, formData);
-            if (res.data.message.toLowerCase().includes("successful") || res.data.message === "Success") {
+            const res = await axios.post(
+                `http://localhost:5000${endpoint}`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+            if (
+                res.data.message.toLowerCase().includes("successful") ||
+                res.data.message === "Success"
+            ) {
                 if (!isSignup) {
                     localStorage.setItem('token', res.data.token);
-                    navigate('/dashboard'); // 🚀 Silent redirect
+                    navigate('/dashboard');
                 } else {
-                    setIsSignup(false); // 🚀 Silent switch to login view
+                    setIsSignup(false);
                 }
             }
         } catch (err) {
