@@ -3,181 +3,172 @@ import axios from 'axios';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL =
-  process.env.REACT_APP_API_URL ||
-  'https://YOUR-BACKEND-NAME.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Login = () => {
-  const [isSignup, setIsSignup] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
-
-  const navigate = useNavigate();
-
-  const { name, email, password } = formData;
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const [isSignup, setIsSignup] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: ''
     });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const navigate = useNavigate();
 
-    const endpoint = isSignup
-      ? '/api/signup'
-      : '/api/login';
+    const { name, email, password } = formData;
 
-    try {
-      const res = await axios.post(
-        `${API_URL}${endpoint}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const endpoint = isSignup
+            ? '/api/signup'
+            : '/api/login';
+
+        try {
+            const res = await axios.post(
+                `${API_URL}${endpoint}`,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log(res.data);
+
+            if (
+                res.data.message
+                    ?.toLowerCase()
+                    .includes('successful')
+            ) {
+                if (!isSignup) {
+                    localStorage.setItem(
+                        'token',
+                        res.data.token
+                    );
+
+                    navigate('/dashboard');
+                } else {
+                    setIsSignup(false);
+                }
+            }
+        } catch (err) {
+            console.error(
+                'Auth Error:',
+                err.response?.data || err.message
+            );
         }
-      );
+    };
 
-      console.log('Response:', res.data);
+    return (
+        <div className="login-page">
+            <div className="left-section">
+                <h1 className="brand-title">
+                    CloudLearn <span>Hub</span>
+                </h1>
 
-      if (
-        res.data.message?.toLowerCase().includes('successful') ||
-        res.data.message === 'Success'
-      ) {
-        if (!isSignup) {
-          localStorage.setItem(
-            'token',
-            res.data.token
-          );
+                <ul className="features-list">
+                    <li>
+                        ✓ User authentication with
+                        MongoDB for secure access.
+                    </li>
 
-          navigate('/dashboard');
-        } else {
-          alert('Signup Successful!');
-          setIsSignup(false);
-        }
-      }
-    } catch (err) {
-      console.error(
-        'Auth Error:',
-        err.response?.data || err.message
-      );
+                    <li>
+                        ✓ File upload and storage
+                        powered by AWS S3.
+                    </li>
 
-      alert(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          'Something went wrong'
-      );
-    }
-  };
+                    <li>
+                        ✓ Fast, scalable platform for
+                        managing study materials.
+                    </li>
+                </ul>
+            </div>
 
-  return (
-    <div className="login-page">
-      <div className="left-section">
-        <h1 className="brand-title">
-          CloudLearn <span>Hub</span>
-        </h1>
+            <div className="right-section">
+                <div className="login-card glass">
+                    <h2 className="form-title">
+                        {isSignup
+                            ? 'Create Account'
+                            : 'Welcome Back'}
+                    </h2>
 
-        <ul className="features-list">
-          <li>
-            ✓ User authentication with MongoDB for
-            secure access.
-          </li>
-          <li>
-            ✓ File upload and storage powered by AWS
-            S3.
-          </li>
-          <li>
-            ✓ Fast, scalable platform for managing
-            study materials.
-          </li>
-        </ul>
-      </div>
+                    <p className="subtitle">
+                        {isSignup
+                            ? 'Join our workspace'
+                            : 'Login to your workspace'}
+                    </p>
 
-      <div className="right-section">
-        <div className="login-card glass">
-          <h2 className="form-title">
-            {isSignup
-              ? 'Create Account'
-              : 'Welcome Back'}
-          </h2>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="auth-form"
+                    >
+                        {isSignup && (
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Full Name"
+                                value={name}
+                                onChange={handleChange}
+                                required
+                            />
+                        )}
 
-          <p className="subtitle">
-            {isSignup
-              ? 'Join our workspace'
-              : 'Login to your workspace'}
-          </p>
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Login ID (Email)"
+                            value={email}
+                            onChange={handleChange}
+                            required
+                        />
 
-          <form
-            onSubmit={handleSubmit}
-            className="auth-form"
-          >
-            {isSignup && (
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={name}
-                onChange={handleChange}
-                required
-                autoComplete="name"
-              />
-            )}
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={handleChange}
+                            required
+                        />
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Login ID (Email)"
-              value={email}
-              onChange={handleChange}
-              required
-              autoComplete="email"
-            />
+                        <button
+                            type="submit"
+                            className="login-btn"
+                        >
+                            {isSignup
+                                ? 'Sign Up'
+                                : 'Login'}
+                        </button>
+                    </form>
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={password}
-              onChange={handleChange}
-              required
-              autoComplete={
-                isSignup
-                  ? 'new-password'
-                  : 'current-password'
-              }
-            />
+                    <p className="toggle-text">
+                        {isSignup
+                            ? 'Already have an account? '
+                            : "Don't have an account? "}
 
-            <button
-              type="submit"
-              className="login-btn"
-            >
-              {isSignup ? 'Sign Up' : 'Login'}
-            </button>
-          </form>
-
-          <p className="toggle-text">
-            {isSignup
-              ? 'Already have an account? '
-              : "Don't have an account? "}
-
-            <span
-              onClick={() =>
-                setIsSignup(!isSignup)
-              }
-            >
-              {isSignup ? 'Login' : 'Sign Up'}
-            </span>
-          </p>
+                        <span
+                            onClick={() =>
+                                setIsSignup(!isSignup)
+                            }
+                        >
+                            {isSignup
+                                ? 'Login'
+                                : 'Sign Up'}
+                        </span>
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Login;
